@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.profProgramMapper">
+	<!-- 获取专业选修课模块 -->
+	<select id="getCategories" parameterType="int" resultType="Category">
+		SELECT category_id id,
+		category_name text,
+		major_id majorId
+		FROM
+		tb_prof_category
+		WHERE
+		major_id=#{major}
+	</select>
+	<insert id="insertCategory" parameterType="Category">
+		INSERT INTO
+		tb_prof_category(
+		category_id,
+		category_name,
+		major_id
+		)VALUES(
+		#{id},#{text},#{majorId}
+		)
+	</insert>
+	<delete id="deleteCategory" parameterType="java.lang.String">
+		DELETE FROM
+		tb_prof_category
+		WHERE
+		category_id = #{cateId}
+	</delete>
+	<!-- 按模块获取相关的选修课程 -->
+	<select id="getProfProgramsByCate" parameterType="java.lang.String"
+		resultType="profProgram">
+		SELECT program_id id,program_name name,project_id
+		projectId,
+		program_score score,program_sum_hour
+		sumHour,program_week_hour
+		weekHour,
+		program_practice_hour practiceHour,
+		teaching_dept teachDept,
+		program_teach_term teachTerm
+		FROM tb_profess_programs
+		<where>
+			category_id=#{cateId}
+			AND
+			is_delete=false
+		</where>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteBatch" parameterType="java.util.List">
+		DELETE FROM tb_profess_programs
+		<where>
+			program_id IN
+			<foreach collection="list" item="profp" open="(" separator=","
+				close=")">
+				#{profp.id}
+			</foreach>
+		</where>
+	</delete>
+	<!-- 单个插入 -->
+	<insert id="insertProfProgram" parameterType="profProgram">
+		INSERT INTO
+		tb_profess_programs(
+		program_id,program_name,project_id,
+		program_score,program_sum_hour,program_week_hour,
+		program_practice_hour,program_teach_term,
+		teaching_dept,category_id
+		)VALUES(
+		#{id},#{name},#{projectId},
+		#{score},#{sumHour},#{weekHour},
+		#{practiceHour},#{teachTerm},
+		#{teachDept},#{cateId}
+		)
+	</insert>
+	<!-- 批量更新 -->
+	<update id="updateBatch" parameterType="java.util.List">
+		<foreach collection="list" item="profp" separator=";">
+			UPDATE tb_profess_programs
+			<set>
+				program_name = #{profp.name} ,
+				project_id = #{profp.projectId},
+				program_score = #{profp.score},
+				program_sum_hour = #{profp.sumHour},
+				program_week_hour = #{profp.weekHour},
+				program_practice_hour
+				=
+				#{profp.practiceHour},
+				program_teach_term = #{profp.teachTerm},
+				teaching_dept = #{profp.teachDept},
+				category_id = #{profp.cateId}
+			</set>
+			<where>
+				program_id = #{profp.id}
+			</where>
+		</foreach>
+	</update>
+</mapper>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.o
+    rg/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ProjectMapper">
+	<resultMap type="Project" id="ProjectMap">
+		<id column="id" property="id" />
+		<result column="sumHours" property="sumHours" />
+		<result column="theoryHours" property="theoryHours" />
+		<result column="practiceHours" property="practiceHours" />
+		<result column="weekHours" property="weekHours" />
+		<result column="level" property="level" />
+		<result column="name" property="name" />
+		<result column="quality" property="quality" />
+		<result column="score" property="score" />
+		<result column="type" property="type" />
+		<result column="createdDpt" property="createdDpt" />
+		<association property="projectDetails" javaType="ProjectDetails">
+			<result column="computer_hours" property="computerHours" />
+			<result column="inner_action_hours" property="innerActionHours" />
+			<result column="inner_computer_hours" property="innerComputerHours" />
+			<result column="outter_computer_hours" property="outterComputerHours" />
+			<result column="mission_hours" property="missionHours" />
+			<result column="outter_hours" property="outterHours" />
+			<result column="belongto" property="belongTo" />
+			<result column="test_method" property="testMethod" />
+			<result column="dept_id" property="dptId" />
+			<result column="research_section" property="researchSection" />
+			<result column="experiment_dpt_id" property="experimentDptId" />
+			<result column="listening_flag" property="listeningFlag" />
+			<result column="weight" property="weight" />
+			<result column="pre_project" property="preProject" />
+			<result column="introduction" property="introduction" />
+			<result column="unquick_chosen" property="unQuickChosen" />
+			<result column="role_goal" property="roleAndGoal" />
+			<result column="reference_books" property="referenceBooks" />
+			<result column="replacable_project_id" property="replacableProjectId" />
+			<result column="workload" property="workLoad" />
+			<result column="use_book" property="useBook" />
+			<result column="experiment_nums" property="experimentNums" />
+			<result column="note" property="note" />
+			<result column="teach_method" property="teachMethod" />
+			<result column="sexxed_mission" property="sexxedMission" />
+			<result column="uncharge_flag" property="unchargeFlag" />
+			<result column="project_class" property="projectClass" />
+			<result column="chosen_object" property="chosenObject" />
+			<result column="main_teacher" property="mainTeacher" />
+			<result column="action_type" property="actionType" />
+			<result column="use_major" property="useMajor" />
+			<result column="main_dept" property="mainDpt" />
+			<result column="test_model" property="testModel" />
+			<result column="quality_evaluation" property="qualityEvaluation" />
+		</association>
+	</resultMap>
+	<!-- 更新 -->
+	<update id="updateProjects" parameterType="java.util.List">
+		<foreach collection="list" separator=";" item="proj">
+			UPDATE tb_projects p,tb_project_details pd
+			<set>
+				p.project_quality = #{proj.quality},
+				p.project_type =
+				#{proj.type},
+				p.project_level = #{proj.level},
+				pd.note =
+				#{proj.projectDetails.note}
+			</set>
+			<where>
+				p.project_id = #{proj.id}
+				AND pd.project_id = #{proj.id}
+			</where>
+		</foreach>
+	</update>
+	<!-- 插入 -->
+	<insert id="insertBatch" parameterType="java.util.List">
+		INSERT INTO
+		tb_projects(
+		project_id,project_name,project_score,sum_hours,
+		theory_hours,practice_hours,project_quality,project_type,
+		project_level,create_dept,week_hour
+		)VALUES
+		<foreach collection="list" item="proj" separator=",">
+			(
+			#{proj.id},#{proj.name},#{proj.score},#{proj.sumHours},
+			#{proj.theoryHours},#{proj.practiceHours},#{proj.quality},#{proj.type},
+			#{proj.level},#{proj.createdDpt},#{proj.weekHours}
+			)
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+			project_name=VALUES(project_name),
+			project_score=VALUES(project_score),
+			sum_hours=VALUES(sum_hours),
+			theory_hours=VALUES(theory_hours),
+			practice_hours=VALUES(practice_hours),
+			project_quality=VALUES(project_quality),
+			project_type=VALUES(project_type),
+			project_level=VALUES(project_level),
+			create_dept=VALUES(create_dept),
+			week_hour=VALUES(week_hour)
+	</insert>
+	<!-- Id查找 -->
+	<select id="findById" resultMap="ProjectMap" parameterType="java.lang.String">
+		SELECT * FROM v_projects
+		<where>
+			id=#{value}
+		</where>
+	</select>
+	<!-- 关键字搜索子句 -->
+	<sql id="isSearch">
+		<if test="searchInfo != null and !''.equals(searchInfo)">
+			id=#{searchInfo} OR
+			name LIKE '%${searchInfo}%'
+		</if>
+	</sql>
+	<!-- 获取必修课 -->
+	<select id="getRequired" resultMap="ProjectMap">
+		SELECT * FROM v_projects
+		WHERE is_required=1
+	</select>
+	<!-- 分页获取 -->
+	<select id="findProject" parameterType="BaseVo" resultMap="ProjectMap">
+		SELECT * FROM v_projects
+		<where>
+			<include refid="isSearch" />
+		</where>
+		<if test="order!=null and sort!=null">
+			<if test="!''.equals(order) and !''.equals(sort)">
+				ORDER BY ${sort} ${order}
+			</if>
+		</if>
+		<if test="rows>0">
+			LIMIT #{index},#{rows}
+		</if>
+	</select>
+	<!-- 获取总数 -->
+	<select id="getSum" parameterType="BaseVo" resultType="int">
+		SELECT
+		COUNT(id) FROM v_projects
+		<where>
+			<include refid="isSearch" />
+		</where>
+	</select>
+	<!-- 批量软删除 -->
+	<delete id="deleteBatch" parameterType="java.util.List">
+		UPDATE tb_projects
+		SET
+		is_delete = true
+		<where>
+			project_id IN
+			<foreach collection="list" item="proj" open="(" separator=","
+				close=")">
+				#{proj.id}
+			</foreach>
+		</where>
+	</delete>
+</mapper>

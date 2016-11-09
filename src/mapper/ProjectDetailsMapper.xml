@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ProjectDetailsMapper">
+	<!-- 这些信息在项目中一点用没有，徒耗性能，可根据业务需求全部砍掉 -->
+	<insert id="insertBatch" parameterType="java.util.List">
+		INSERT INTO
+		tb_project_details
+		(project_id,computer_hours,inner_action_hours,inner_computer_hours,
+		outter_computer_hours,mission_hours,outter_hours,belongto,
+		test_method,dept_id,research_section,experiment_dpt_id,
+		listening_flag,weight,pre_project,introduction,
+		unquick_chosen,role_goal,reference_books,replacable_project_id,
+		workload,use_book,experiment_nums,note,
+		teach_method,sexxed_mission,uncharge_flag,project_class,
+		chosen_object,main_teacher,action_type,use_major,
+		main_dept,test_model,quality_evaluation
+		)VALUES
+		<foreach collection="list" item="proj" separator=",">
+			(
+			#{proj.id},#{proj.projectDetails.computerHours},
+			#{proj.projectDetails.innerActionHours},#{proj.projectDetails.innerComputerHours},
+			#{proj.projectDetails.outterComputerHours},#{proj.projectDetails.missionHours},
+			#{proj.projectDetails.outterHours},#{proj.projectDetails.belongTo},
+			#{proj.projectDetails.testMethod},#{proj.projectDetails.dptId},
+			#{proj.projectDetails.researchSection},#{proj.projectDetails.experimentDptId},
+			#{proj.projectDetails.listeningFlag},#{proj.projectDetails.weight},
+			#{proj.projectDetails.preProject},#{proj.projectDetails.introduction},
+			#{proj.projectDetails.unQuickChosen},#{proj.projectDetails.roleAndGoal},
+			#{proj.projectDetails.referenceBooks},#{proj.projectDetails.replacableProjectId},
+			#{proj.projectDetails.workLoad},#{proj.projectDetails.useBook},
+			#{proj.projectDetails.experimentNums},#{proj.projectDetails.note},
+			#{proj.projectDetails.teachMethod},#{proj.projectDetails.sexxedMission},
+			#{proj.projectDetails.unchargeFlag},#{proj.projectDetails.projectClass},
+			#{proj.projectDetails.chosenObject},#{proj.projectDetails.mainTeacher},
+			#{proj.projectDetails.actionType},#{proj.projectDetails.useMajor},
+			#{proj.projectDetails.mainDpt},#{proj.projectDetails.testModel},
+			#{proj.projectDetails.qualityEvaluation}
+			)
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		computer_hours=VALUES(computer_hours),
+		inner_action_hours=VALUES(inner_action_hours),
+		inner_computer_hours=VALUES(inner_computer_hours),
+		outter_computer_hours=VALUES(outter_computer_hours),
+		mission_hours=VALUES(mission_hours),
+		outter_hours=VALUES(outter_hours),
+		belongto=VALUES(belongto),
+		test_method=VALUES(test_method),
+		dept_id=VALUES(dept_id),
+		research_section=VALUES(research_section),
+		experiment_dpt_id=VALUES(experiment_dpt_id),
+		listening_flag=VALUES(listening_flag),
+		weight=VALUES(weight),
+		pre_project=VALUES(pre_project),
+		introduction=VALUES(introduction),
+		unquick_chosen=VALUES(unquick_chosen),
+		role_goal=VALUES(role_goal),
+		reference_books=VALUES(reference_books),
+		replacable_project_id=VALUES(replacable_project_id),
+		workload=VALUES(workload),
+		use_book=VALUES(use_book),
+		experiment_nums=VALUES(experiment_nums),
+		note=VALUES(note),
+		teach_method=VALUES(teach_method),
+		sexxed_mission=VALUES(sexxed_mission),
+		uncharge_flag=VALUES(uncharge_flag),
+		project_class=VALUES(project_class),
+		chosen_object=VALUES(chosen_object),
+		main_teacher=VALUES(main_teacher),
+		action_type=VALUES(action_type),
+		use_major=VALUES(use_major),
+		main_dept=VALUES(main_dept),
+		test_model=VALUES(test_model),
+		quality_evaluation=VALUES(quality_evaluation)
+	</insert>
+</mapper>

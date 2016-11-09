@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ManagerMapper">
+	<resultMap type="Manager" id="ManagerResult">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="level" property="level" />
+		<association property="maintainMajor" javaType="Major"
+			select="mapper.MajorMapper.findById" column="maintain_major">
+		</association>
+		<collection property="querableMajors" ofType="Major"
+			select="mapper.MajorMapper.findMajorsByCollege" column="scnd_college">
+		</collection>
+	</resultMap>
+	<select id="findById" parameterType="ManagerVo" resultMap="ManagerResult">
+		SELECT * FROM v_dp_manager
+		<where>
+			id=#{id}
+			AND password=#{password}
+			AND level>1
+			<if test="'admin'.equals(character)">
+				AND level>=4
+			</if>
+		</where>
+	</select>
+	<select id="findManager" parameterType="ManagerVo" resultMap="ManagerResult">
+		SELECT
+		v_dp_manager.id,v_dp_manager.name,maintain_major,level,tb_scnd_college.name
+		scndCollege
+		FROM v_dp_manager
+		LEFT JOIN tb_scnd_college
+		ON
+		scnd_college=tb_scnd_college.id
+		<where>
+			<if test="searchInfo != null and !''.equals(searchInfo)">
+				v_dp_manager.id = #{searchInfo}
+				OR v_dp_manager.name LIKE
+				'%${searchInfo}%'
+			</if>
+		</where>
+	</select>
+	<select id="getStatisticByMajor" parameterType="int" resultType="statisticData">
+		SELECT
+		v_module_statistc.categoryName category,
+		v_module_statistc.moduleSumHour moduleHour,
+		v_module_statistc.moduleSumScore moduleScore,
+		v_prctc_gen_statistc.sumHour prctcGenSumHour,
+		v_prctc_gen_statistc.sumScore prctcGenSumScore,
+		v_gen_statistc.genSumHour ,
+		v_gen_statistc.genSumScore ,
+		v_prctc_mod_statistc.prctcModHour ,
+		v_prctc_mod_statistc.prctcModScore
+		FROM v_module_statistc
+		LEFT JOIN v_prctc_gen_statistc
+		ON
+		v_module_statistc.majorId=v_prctc_gen_statistc.majorId
+		LEFT JOIN
+		v_gen_statistc
+		ON
+		v_gen_statistc.majorId=v_module_statistc.majorId
+		LEFT
+		JOIN v_prctc_mod_statistc
+		ON
+		(v_prctc_mod_statistc.majorId=v_module_statistc.majorId
+		AND
+		v_prctc_mod_statistc.scndCate=v_module_statistc.categoryName)
+		<where>
+			v_module_statistc.majorId=#{id}
+		</where>
+	</select>
+	<update id="updateManagers" parameterType="java.util.List">
+		<foreach collection="list" separator=";" item="manager">
+			UPDATE tb_dp_manager
+			<set>
+				level = #{manager.level} ,
+				maintain_major =
+				#{manager.maintainMajor.id}
+			</set>
+			<where>
+				id = #{manager.id}
+			</where>
+		</foreach>
+	</update>
+	<update id="updatePwd" parameterType="ManagerVo">
+		UPDATE tb_manager
+		SET
+		password = #{newPassword}
+		WHERE
+		id = #{id}
+	</update>
+</mapper>

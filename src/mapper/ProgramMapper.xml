@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.ProgramMapper">
+
+	<!-- 查找相关培养方案信息 -->
+	<select id="findPrograms" parameterType="ProgramVo" resultType="Program">
+		SELECT * FROM v_gen_progs
+		<where>
+			<include refid="programFilter"></include>
+			ORDER BY scndCate,
+			first DESC,second DESC,third DESC,forth DESC,
+			fifth
+			DESC,sixth
+			DESC,seventh
+			DESC,eighth DESC
+			<if test="rows>0">
+				LIMIT #{index},#{rows}
+			</if>
+		</where>
+	</select>
+	<!-- 查询字段 -->
+	<sql id="programFilter">
+		majorId = #{majorId}
+		AND progMdId = #{moduleId}
+		<if test="searchInfo!=null and !''.equals(searchInfo) ">
+			AND	(projectId=#{searchInfo} OR
+			name LIKE '%${searchInfo}%')
+		</if>
+	</sql>
+	<select id="getSum" parameterType="ProgramVo" resultType="int">
+		SELECT COUNT(*) FROM v_gen_progs
+		<where>
+			<include refid="programFilter"></include>
+		</where>
+	</select>
+	<!-- 获取选修课信息 -->
+	<select id="getReqOptioned" resultType="Program" parameterType="int">
+		SELECT * FROM v_gen_progs
+		<where>
+			majorId = #{majorId}
+			AND progMdId = 40
+		</where>
+	</select>
+	<!-- 批量更新建议必修课程 -->
+	<update id="updateRequired" parameterType="java.util.List">
+		<foreach collection="list" item="progr" separator=";">
+			UPDATE
+			tb_general_programs SET
+			first = #{progr.first} ,second =
+			#{progr.second} ,
+			third = #{progr.third} ,forth = #{progr.forth} ,
+			fifth = #{progr.fifth} ,sixth = #{progr.sixth} ,
+			seventh =
+			#{progr.seventh},eighth =#{progr.eighth}
+			WHERE
+			program_id = #{progr.id}
+		</foreach>
+	</update>
+
+	<update id="updatePrograms" parameterType="java.util.List">
+		<foreach collection="list" item="progr" separator=";">
+			UPDATE
+			tb_general_programs SET
+			program_name = #{progr.name} ,
+			project_id =
+			#{progr.projectId} ,
+			program_score = #{progr.score} ,
+			program_sum_hour
+			=
+			#{progr.sumHour},
+			program_theory_hour = #{progr.theoryHour} ,
+			program_pracitce_hour =
+			#{progr.practiceHour} ,
+			first = #{progr.first}
+			,
+			second =#{progr.second} ,
+			third
+			= #{progr.third} ,
+			forth =
+			#{progr.forth} ,
+			fifth = #{progr.fifth} ,
+			sixth =
+			#{progr.sixth} ,
+			seventh = #{progr.seventh} ,
+			eighth
+			=#{progr.eighth},
+			start_week =
+			#{progr.startWeek} ,
+			end_week = #{progr.endWeek},
+			teach_dept =
+			#{progr.teachDept},
+			scdcate = #{progr.scndCate}
+			WHERE
+			program_id =
+			#{progr.id}
+		</foreach>
+	</update>
+	<!-- 批量插入建议课程 -->
+	<insert id="insertBatchRequired" parameterType="java.util.List">
+		INSERT INTO
+		tb_general_programs(
+		program_id,program_name,project_id,
+		program_score,program_sum_hour,program_theory_hour,
+		program_pracitce_hour,start_week,end_week,
+		teach_dept,major_id,promd
+		)VALUES
+		<foreach collection="list" item="prog" separator=",">
+			(#{prog.id},#{prog.name},#{prog.projectId},
+			#{prog.score},#{prog.sumHour},#{prog.theoryHour},
+			#{prog.practiceHour},#{prog.startWeek},#{prog.endWeek},
+			#{prog.teachDept},#{prog.majorId},#{prog.promd})
+		</foreach>
+	</insert>
+	<!-- 插入单个课程 -->
+	<insert id="insertProgram" parameterType="Program">
+		INSERT INTO
+		tb_general_programs(
+		program_id,program_name,project_id,
+		program_score,program_sum_hour,program_theory_hour,
+		program_pracitce_hour,first,second,
+		third,forth,fifth,sixth,seventh,
+		eighth,start_week,end_week,teach_dept,
+		major_id,promd,scdcate
+		)VALUES(
+		#{id},#{name},#{projectId},#{score},
+		#{sumHour},#{theoryHour},#{practiceHour},
+		#{first},#{second},#{third},#{forth},
+		#{fifth},#{sixth},#{seventh},#{eighth},
+		#{startWeek},#{endWeek},#{teachDept},
+		#{majorId},#{promd},#{scndCate}
+		);
+	</insert>
+	<!-- 删除该专业的综合教育必修课 -->
+	<delete id="deleteRequiredByMajor" parameterType="int">
+		DELETE FROM
+		tb_general_programs WHERE major_id=#{majorId}
+	</delete>
+	<!-- 删除 -->
+	<delete id="deleteProgram" parameterType="ProgramVo">
+		DELETE FROM tb_general_programs
+		<where>
+			program_id IN
+			<foreach collection="programs" item="prog" open="(" close=")"
+				separator=",">
+				#{prog.id}
+			</foreach>
+		</where>
+	</delete>
+</mapper>

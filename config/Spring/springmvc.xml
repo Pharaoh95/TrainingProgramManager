@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd   
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd   
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!-- 静态资源的解析 -->
+	<mvc:resources location="/js/" mapping="/js/**" />
+	<mvc:resources location="/js/adminView/" mapping="/js/adminView/**" />
+	<mvc:resources location="/js/lib/" mapping="/js/lib/**" />
+	<mvc:resources location="/js/dlgCtx/" mapping="/js/dlgCtx/**" />
+	<mvc:resources location="/css/" mapping="/css/**" />
+	<mvc:resources location="/img/" mapping="/img/**" />
+	<mvc:resources location="/easyui/" mapping="/easyui/**" />
+	<mvc:resources location="/easyui/locale/" mapping="/easyui/locale/**" />
+	<mvc:resources location="/easyui/themes/default/"
+		mapping="/easyui/themes/default/**" />
+	<mvc:resources location="/easyui/themes/" mapping="/easyui/themes/**" />
+	
+	<!-- 使用springmvc的注解驱动可代替以上两个bean配置，同时加载了许多数据的绑定方法，实际开发中使用 -->
+	<mvc:annotation-driven />
+	<!-- 通过组件扫描可以代替注解的Handler中bean配置 ，给出具体的包路径 -->
+	<context:component-scan base-package="controller" />
+	<!-- JSP视图解析器 ：解析JSP,默认使用jstl,所以classpath下得引入jstl的包 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<!-- 加上前后缀，url解析时会自动追加 -->
+		<property name="prefix" value="/WEB-INF/">
+		</property>
+		<property name="suffix" value=".jsp">
+		</property>
+	</bean>
+	<!-- 文件上传解析器，上传文件之必须 -->
+	<!-- 同时需要fileupload与io的jar包 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="2097152" />
+	</bean>
+	<!-- 拦截器 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="controller.LoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+</beans>

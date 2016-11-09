@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.MajorMapper">
+	<resultMap type="Major" id="MajorResult">
+		<id column="id" property="id" />
+		<result column="major_name" property="name" />
+		<result column="major_level" property="level" />
+		<result column="major_category" property="type" />
+		<result column="max_sum_hour" property="maxSumHour" />
+		<result column="min_sum_score" property="minSumScore" />
+		<result column="max_sum_score" property="maxSumScore" />
+	</resultMap>
+	<select id="findAll" resultMap="MajorResult">
+		SELECT * FROM tb_majors
+	</select>
+	<select id="findById" parameterType="int" resultMap="MajorResult">
+		SELECT *
+		FROM tb_majors
+		WHERE id = #{id}
+	</select>
+	<!-- 用户成员属性的查询，不提供接口方法 -->
+	<select id="findMajorsByCollege" parameterType="int" resultMap="MajorResult">
+		SELECT * FROM tb_majors
+		<where>
+			scnd_college=#{college_id} AND scnd_college !=-1
+		</where>
+	</select>
+	<select id="findAdvicedNorms" resultType="AdvicedNorm">
+		SELECT major_category
+		majorCategory,
+		max_sum_hour maxSumHour,
+		min_sum_score minSumScore,
+		max_sum_score maxSumScore
+		FROM tb_majors
+		WHERE id != -1
+		GROUP BY
+		major_category
+		ORDER BY major_level DESC,max_sum_score DESC 
+	</select>
+	<update id="updateAdvicedNorms" parameterType="java.util.List">
+		<foreach collection="list" separator=";" item="advicedNorm">
+			UPDATE tb_majors
+			<set>
+				max_sum_hour = #{advicedNorm.maxSumHour} ,
+				min_sum_score
+				=#{advicedNorm.minSumScore} ,
+				max_sum_score =
+				#{advicedNorm.maxSumScore}
+			</set>
+			<where>
+				major_category=#{advicedNorm.majorCategory}
+			</where>
+		</foreach>
+	</update>
+</mapper>
